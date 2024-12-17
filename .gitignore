@@ -1,0 +1,6 @@
+# Ignorar archivos sensibles y configuraciones locales
+.env
+
+# Ignorar entornos virtuales
+venv/
+__pycache__/
