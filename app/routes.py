@@ -125,3 +125,33 @@ def list_messages(thread_id):
     return jsonify([
         {"role": m.role, "content": m.content, "created_at": m.created_at} for m in messages
     ]), 200
+
+# Borrar un hilo
+@api_bp.route("/threads/<string:thread_id>", methods=["DELETE"])
+def delete_thread(thread_id):
+    if "username" not in session:
+        return jsonify({"error": "User not logged in"}), 401
+
+    # Buscar el usuario actual
+    user = User.query.filter_by(email=session['username']).first()
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    # Buscar el hilo específico
+    thread = Thread.query.filter_by(thread_id=thread_id, user_id=user.id).first()
+    if not thread:
+        return jsonify({"error": "Thread not found or not authorized"}), 404
+
+    try:
+        # Eliminar mensajes asociados al hilo
+        Message.query.filter_by(thread_id=thread.id).delete()
+
+        # Eliminar el hilo
+        db.session.delete(thread)
+        db.session.commit()
+
+        return jsonify({"message": "Thread and associated messages deleted successfully"}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": f"Failed to delete thread: {str(e)}"}), 500
