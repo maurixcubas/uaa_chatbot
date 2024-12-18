@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify, session, redirect, url_for, send_file
 from app import db
 from app.models import User
+import os
 
 auth_bp = Blueprint("auth", __name__)
 
@@ -44,8 +45,13 @@ def home():
 @auth_bp.route('/download-db', methods=['GET'])
 def download_db():
     try:
-        # Ruta relativa al archivo dentro de tu proyecto
-        db_path = "instance/combined.db"
+        # Ruta al archivo combinada con la raíz del proyecto
+        db_path = os.path.join(os.getcwd(), "instance", "combined.db")
+        
+        # Verificar si el archivo existe
+        if not os.path.exists(db_path):
+            return {"success": False, "message": "Archivo no encontrado"}, 404
+        
         return send_file(db_path, as_attachment=True)
     except Exception as e:
         return {"success": False, "message": str(e)}, 500
