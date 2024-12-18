@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify, session, redirect, url_for
+from flask import Blueprint, request, jsonify, session, redirect, url_for, send_file
 from app import db
 from app.models import User
 
@@ -40,3 +40,12 @@ def logout():
 @auth_bp.route('/home')
 def home():
     return {"success": True, "message": "Welcome to the home page!"}
+    
+@auth_bp.route('/download-db', methods=['GET'])
+def download_db():
+    try:
+        # Ruta relativa al archivo dentro de tu proyecto
+        db_path = "instance/combined.db"
+        return send_file(db_path, as_attachment=True)
+    except Exception as e:
+        return {"success": False, "message": str(e)}, 500
